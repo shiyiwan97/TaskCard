@@ -76,7 +76,7 @@ public class CardLayout implements LayoutManager {
             frame.setBackground(new Color(0, 0, 0, 0));  // 设置背景色为透明
             frame.getContentPane().setBackground(new Color(0, 0, 0, 0));  // 内容窗格背景色透明
 
-            JPanel panel = new JPanel(new CardLayout(30)){
+            JPanel panel = new JPanel(new CardLayout(13)){
                 @Override
                 protected void paintComponent(Graphics g) {
                     super.paintComponent(g);
@@ -87,7 +87,7 @@ public class CardLayout implements LayoutManager {
             panel.setOpaque(false);
             for (int i = 0; i < 5; i++) {
                 JButton button = new JButton("Button " + i);
-                button.setPreferredSize(new Dimension(50,30));
+                button.setPreferredSize(new Dimension(500,30));
                 panel.add(button);
             }
 
