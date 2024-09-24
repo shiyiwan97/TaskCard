@@ -91,7 +91,6 @@ public class CardLayout implements LayoutManager {
                 panel.add(button);
             }
 
-
             frame.getContentPane().setBackground(new Color(0, 0, 0, 0));
             frame.add(panel);
             frame.pack();
