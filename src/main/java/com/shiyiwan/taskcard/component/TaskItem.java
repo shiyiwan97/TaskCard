@@ -3,12 +3,18 @@ package com.shiyiwan.taskcard.component;
 import com.shiyiwan.taskcard.GlobalComponentMap;
 import com.shiyiwan.taskcard.config.Config;
 import com.shiyiwan.taskcard.util.Utils;
+import lombok.Getter;
+
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @Classname TaskItem
@@ -18,12 +24,15 @@ import java.awt.*;
  */
 public class TaskItem extends JPanel {
 
+    @Getter
     private String taskName;
 
     private JLabel taskNameLabel;
 
+    @Getter
     private String taskDesc;
 
+    @Getter
     private Integer remainTime;
 
     private String remainTimeDesc;
@@ -53,7 +62,7 @@ public class TaskItem extends JPanel {
         JButton endBtn = new JButton("⏸");
         endBtn.addActionListener(e -> pauseTimer());
         JButton editBtn = new JButton("✎");
-        editBtn.addActionListener(e -> clickEdit());
+        editBtn.addActionListener(e -> clickEdit(this));
         JPanel operatePanel = new JPanel();
         operatePanel.setLayout(new GridLayout());
         operatePanel.add(editBtn);
@@ -87,14 +96,14 @@ public class TaskItem extends JPanel {
         //todo
     }
 
-    private void clickEdit() {
-        EditDialog editDialog = new EditDialog();
+    private void clickEdit(TaskItem taskItem) {
+        EditDialog editDialog = new EditDialog(taskItem);
         int result = JOptionPane.showConfirmDialog(GlobalComponentMap.getTaskContainer(), editDialog, "Edit",
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-        if(result == JOptionPane.OK_OPTION){
+        if (result == JOptionPane.OK_OPTION) {
             String taskName = editDialog.taskName.getText();
             String taskDesc = editDialog.taskDesc.getText();
-            int remainTime = Integer.parseInt(editDialog.remainTime.getText());
+            int remainTime = Utils.parserRemainTime(editDialog.remainTime.getText());
             this.taskName = taskName;
             this.taskDesc = taskDesc;
             this.remainTime = remainTime;
@@ -108,20 +117,58 @@ public class TaskItem extends JPanel {
         private JTextField taskDesc;
         private JTextField remainTime;
 
-        public EditDialog() {
+        public EditDialog(TaskItem taskItem) {
             this.setLayout(new GridLayout(3, 2, 5, 5));
             JLabel label1 = new JLabel("taskName");
             taskName = new JTextField();
             JLabel label2 = new JLabel("taskDesc");
             taskDesc = new JTextField();
+            if(taskItem != null){
+                taskName.setText(taskItem.getTaskName());
+                taskDesc.setText(taskItem.getTaskDesc());
+            }
+            JPanel remainTimePanel = new JPanel();
+            remainTimePanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 5));
             JLabel label3 = new JLabel("remainTime");
+            JButton questionBtn = new JButton("?");
+            questionBtn.putClientProperty("JButton.buttonType", "roundRect");
+            questionBtn.setPreferredSize(new Dimension(15, 15));
+            questionBtn.setEnabled(false);
+            questionBtn.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    questionBtn.setToolTipText("you can type like 1h23m45s");
+                }
+            });
+            remainTimePanel.add(label3);
+            remainTimePanel.add(Box.createRigidArea(new Dimension(5, 0)));
+            remainTimePanel.add(questionBtn);
+
             remainTime = new JTextField();
+            remainTime.setInputVerifier(new InputVerifier() {
+                @Override
+                public boolean verify(JComponent JComponent) {
+                    String input = ((JTextField) JComponent).getText().toLowerCase();
+                    String regex = "(\\d+h)?(\\d+m)?(\\d+s)?";
+                    Pattern pattern = Pattern.compile(regex);
+                    Matcher matcher = pattern.matcher(input);
+                    boolean matches = matcher.matches();
+                    System.out.println("matches = " + matches);
+                    if(!matches){
+                        JOptionPane.showMessageDialog(GlobalComponentMap.getTaskContainer(),
+                                "<html>input need matches regexp:<br>(\\d+h)?(\\d+m)?(\\d+s)?<br>example:<br>1h23m45s",
+                                "remainTime format wrong",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                    return matches;
+                }
+            });
 
             this.add(label1);
             this.add(taskName);
             this.add(label2);
             this.add(taskDesc);
-            this.add(label3);
+            this.add(remainTimePanel);
             this.add(remainTime);
         }
     }
