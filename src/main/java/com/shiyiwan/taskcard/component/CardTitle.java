@@ -1,6 +1,8 @@
 package com.shiyiwan.taskcard.component;
 
-import com.shiyiwan.taskcard.GlobalComponentMap;
+import com.shiyiwan.taskcard.GlobalMap;
+import com.shiyiwan.taskcard.config.Config;
+import com.shiyiwan.taskcard.persistent.PersistenceManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,7 +22,7 @@ public class CardTitle extends JPanel {
 
     private JProgressBar todayRemainBar;
     JLabel timeLabel;
-    private LocalDateTime now = LocalDateTime.now();;
+    private LocalDateTime now = LocalDateTime.now();
 
     public CardTitle() {
 
@@ -30,26 +32,33 @@ public class CardTitle extends JPanel {
         todayRemainBar.setStringPainted(true);
         this.setLayout(new BorderLayout());
 
+        JPanel operationPanel = new JPanel();
+        operationPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
         JButton addBtn = new JButton("+");
         addBtn.addActionListener(e -> {
-            JPanel taskContainer = GlobalComponentMap.getTaskContainer();
+            JPanel taskContainer = GlobalMap.getTaskContainer();
             creatTask(taskContainer);
             taskContainer.revalidate();
             taskContainer.repaint();
         });
-        this.add(addBtn,BorderLayout.EAST);
+        JButton saveBtn = new JButton("\uD83D\uDDAB");
+        saveBtn.addActionListener(e -> PersistenceManager.saveData());
+
+        operationPanel.add(addBtn);
+        operationPanel.add(saveBtn);
 
         JPanel center = new JPanel();
         center.setLayout(new FlowLayout(FlowLayout.LEFT));
         timeLabel = new JLabel();
         center.add(todayRemainBar);
         center.add(timeLabel);
-        this.add(center,BorderLayout.CENTER);
+        this.add(center, BorderLayout.CENTER);
+        this.add(operationPanel,BorderLayout.EAST);
         update();
     }
 
-    private void update(){
-        new Timer(1000,e -> {
+    private void update() {
+        new Timer(1000, e -> {
             now = LocalDateTime.now();
             String currentTime = new SimpleDateFormat("HH:mm:ss").format(new Date());
             timeLabel.setText(currentTime);
@@ -57,22 +66,25 @@ public class CardTitle extends JPanel {
         setTodayRemain();
     }
 
-    private void creatTask(JPanel container){
-        TaskItem taskItem = new TaskItem("tn", "td", 6000);
-        container.add(taskItem);
+    private void creatTask(JPanel container) {
+        TaskItem taskItem = new TaskItem(Config.DEFAULT_TASK_NAME, Config.DEFAULT_TASK_DESC, Config.DEFAULT_TASK_TIME);
+        TaskItem addItem = taskItem.clickAdd();
+        if (addItem != null) {
+            container.add(addItem);
+        }
     }
 
-    private void setTodayRemain(){
+    private void setTodayRemain() {
         LocalDateTime endOfDay = now.toLocalDate().atTime(LocalTime.MAX);
         long secondsRemaining = ChronoUnit.SECONDS.between(now, endOfDay);
         long totalSecondsInDay = ChronoUnit.SECONDS.between(LocalTime.MIN, LocalTime.MAX) + 1;
         double todayRemain = (double) (totalSecondsInDay - secondsRemaining) / totalSecondsInDay * 100;
-        todayRemainBar.setValue((int)todayRemain);
+        todayRemainBar.setValue((int) todayRemain);
     }
 
     public static void main(String[] args) {
         JFrame jFrame = new JFrame();
-        jFrame.setSize(600,800);
+        jFrame.setSize(600, 800);
         CardTitle cardTitle = new CardTitle();
         jFrame.add(cardTitle);
         jFrame.setVisible(true);

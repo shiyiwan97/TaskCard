@@ -1,6 +1,6 @@
 package com.shiyiwan.taskcard.component;
 
-import com.shiyiwan.taskcard.GlobalComponentMap;
+import com.shiyiwan.taskcard.GlobalMap;
 import com.shiyiwan.taskcard.config.Config;
 import com.shiyiwan.taskcard.util.Utils;
 import lombok.Getter;
@@ -62,7 +62,7 @@ public class TaskItem extends JPanel {
         JButton endBtn = new JButton("⏸");
         endBtn.addActionListener(e -> pauseTimer());
         JButton editBtn = new JButton("✎");
-        editBtn.addActionListener(e -> clickEdit(this));
+        editBtn.addActionListener(e -> clickEdit());
         JPanel operatePanel = new JPanel();
         operatePanel.setLayout(new GridLayout());
         operatePanel.add(editBtn);
@@ -96,9 +96,24 @@ public class TaskItem extends JPanel {
         //todo
     }
 
-    private void clickEdit(TaskItem taskItem) {
-        EditDialog editDialog = new EditDialog(taskItem);
-        int result = JOptionPane.showConfirmDialog(GlobalComponentMap.getTaskContainer(), editDialog, "Edit",
+    public TaskItem clickAdd() {
+        return clickAddOrEdit(true);
+    }
+
+    private TaskItem clickEdit() {
+        return clickAddOrEdit(false);
+    }
+
+
+    private TaskItem clickAddOrEdit(boolean isAdd) {
+        EditDialog editDialog = new EditDialog(this);
+        String dialogTitle;
+        if (isAdd) {
+            dialogTitle = "Add";
+        } else {
+            dialogTitle = "Edit";
+        }
+        int result = JOptionPane.showConfirmDialog(GlobalMap.getTaskContainer(), editDialog, dialogTitle,
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (result == JOptionPane.OK_OPTION) {
             String taskName = editDialog.taskName.getText();
@@ -108,7 +123,9 @@ public class TaskItem extends JPanel {
             this.taskDesc = taskDesc;
             this.remainTime = remainTime;
             textLabel.setText(taskName + " | " + taskDesc + " | " + Utils.secondsToTime(remainTime));
+            return this;
         }
+        return null;
     }
 
     class EditDialog extends JPanel {
@@ -123,10 +140,7 @@ public class TaskItem extends JPanel {
             taskName = new JTextField();
             JLabel label2 = new JLabel("taskDesc");
             taskDesc = new JTextField();
-            if(taskItem != null){
-                taskName.setText(taskItem.getTaskName());
-                taskDesc.setText(taskItem.getTaskDesc());
-            }
+
             JPanel remainTimePanel = new JPanel();
             remainTimePanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 5));
             JLabel label3 = new JLabel("remainTime");
@@ -154,8 +168,8 @@ public class TaskItem extends JPanel {
                     Matcher matcher = pattern.matcher(input);
                     boolean matches = matcher.matches();
                     System.out.println("matches = " + matches);
-                    if(!matches){
-                        JOptionPane.showMessageDialog(GlobalComponentMap.getTaskContainer(),
+                    if (!matches) {
+                        JOptionPane.showMessageDialog(GlobalMap.getTaskContainer(),
                                 "<html>input need matches regexp:<br>(\\d+h)?(\\d+m)?(\\d+s)?<br>example:<br>1h23m45s",
                                 "remainTime format wrong",
                                 JOptionPane.ERROR_MESSAGE);
@@ -163,6 +177,12 @@ public class TaskItem extends JPanel {
                     return matches;
                 }
             });
+
+            if (taskItem != null) {
+                taskName.setText(taskItem.getTaskName());
+                taskDesc.setText(taskItem.getTaskDesc());
+                remainTime.setText(Utils.secondsToTime2(taskItem.getRemainTime()));
+            }
 
             this.add(label1);
             this.add(taskName);

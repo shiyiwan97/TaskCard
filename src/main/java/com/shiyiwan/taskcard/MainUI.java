@@ -1,7 +1,6 @@
-package com.shiyiwan;
+package com.shiyiwan.taskcard;
 
 import com.formdev.flatlaf.FlatLightLaf;
-import com.shiyiwan.taskcard.GlobalComponentMap;
 import com.shiyiwan.taskcard.component.CardTitle;
 import com.shiyiwan.taskcard.component.TaskItem;
 import com.shiyiwan.taskcard.layout.CardLayout;
@@ -20,9 +19,10 @@ public class MainUI {
     public static void main(String[] args) throws UnsupportedLookAndFeelException {
         UIManager.setLookAndFeel(new FlatLightLaf());
         JFrame jFrame = new JFrame();
+        jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jFrame.setSize(800, 600);
         JPanel taskContainer = new JPanel();
-        GlobalComponentMap.setTaskContainer(taskContainer);
+        GlobalMap.setTaskContainer(taskContainer);
         jFrame.setLayout(new BorderLayout());
 
         CardTitle cardTitle = new CardTitle();
@@ -34,7 +34,7 @@ public class MainUI {
         taskContainer.add(taskItem2);
 
         jFrame.add(taskContainer, BorderLayout.CENTER);
-        jFrame.add(cardTitle,BorderLayout.NORTH);
+        jFrame.add(cardTitle, BorderLayout.NORTH);
         jFrame.setVisible(true);
     }
 

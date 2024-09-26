@@ -23,6 +23,30 @@ public class Utils {
         return "" + convertToTwoDigits(hours) + ":" + convertToTwoDigits(minutes) + ":" + convertToTwoDigits(seconds);
     }
 
+    public static String secondsToTime2(Integer total) {
+        if (total < 0) {
+            // todo customer exception handler
+            throw new RuntimeException("remain time must be positive");
+        }
+        int seconds = total % 60;
+        int minutes = total / 60 % 60;
+        int hours = total / 60 / 60;
+
+        String hoursDesc = "";
+        String minutesDesc = "";
+        String secondsDesc = "";
+        if (hours != 0) {
+            hoursDesc = hours + "h";
+        }
+        if (minutes != 0) {
+            minutesDesc = minutes + "m";
+        }
+        if (seconds != 0) {
+            secondsDesc = seconds + "s";
+        }
+        return hoursDesc + minutesDesc + secondsDesc;
+    }
+
     /**
      * parse 1h23m45s to seconds
      *
