@@ -1,9 +1,14 @@
 package com.shiyiwan.taskcard.persistent;
 
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.shiyiwan.taskcard.GlobalMap;
+import com.shiyiwan.taskcard.component.TaskItem;
 
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,8 +38,12 @@ public class PersistenceManager {
             if (components == null || components.length == 0) {
                 return;
             }
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.disable(MapperFeature.DEFAULT_VIEW_INCLUSION);
+            mapper.enable(SerializationFeature.INDENT_OUTPUT);
+            mapper.writerWithView(TaskItem.SaveFiled.class).writeValue(configFile,components);
 
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | IOException e) {
             throw new RuntimeException(e);
         }
     }

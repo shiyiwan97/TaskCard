@@ -1,5 +1,6 @@
 package com.shiyiwan.taskcard.component;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.shiyiwan.taskcard.GlobalMap;
 import com.shiyiwan.taskcard.config.Config;
 import com.shiyiwan.taskcard.util.Utils;
@@ -25,23 +26,39 @@ import java.util.regex.Pattern;
 public class TaskItem extends JPanel {
 
     @Getter
+    @JsonView(SaveFiled.class)
     private String taskName;
 
     private JLabel taskNameLabel;
 
     @Getter
+    @JsonView(SaveFiled.class)
     private String taskDesc;
 
     @Getter
+    @JsonView(SaveFiled.class)
     private Integer remainTime;
 
     private String remainTimeDesc;
 
     private String text;
 
+    private String htmlPrefix = "<html><body>";
+
+    private String htmlSuffix = "</body></html>";
+
     private JLabel textLabel;
 
     private Timer timer;
+
+    private boolean isStart = false;
+
+    private boolean isDone = false;
+
+    //Btn
+    private JButton startAndPauseBtn;
+
+    private JButton editBtn;
 
     public TaskItem() {
         this(Config.DEFAULT_TASK_NAME, Config.DEFAULT_TASK_DESC, Config.DEFAULT_TASK_TIME);
@@ -56,23 +73,56 @@ public class TaskItem extends JPanel {
 
         this.setLayout(new BorderLayout());
 
-        textLabel = new JLabel(taskName + " | " + taskDesc + " | " + remainTimeDesc);
-        JButton startBtn = new JButton("▶");
-        startBtn.addActionListener(e -> startTimer());
-        JButton endBtn = new JButton("⏸");
-        endBtn.addActionListener(e -> pauseTimer());
-        JButton editBtn = new JButton("✎");
+        JCheckBox checkBox = new JCheckBox();
+        checkBox.setEnabled(false);
+//        checkBox.addActionListener(e -> {
+//            if(checkBox.isSelected()){
+//                textLabel.setText("<html><body><s>" + taskName + " | " + taskDesc + " | " + remainTimeDesc + "</s></body></html>");
+//            }else {
+//                textLabel.setText("<html><body>" + taskName + " | " + taskDesc + " | " + remainTimeDesc + "</body></html>");
+//            }
+//        });
+        JPanel checkBoxPanel = new JPanel(new FlowLayout());
+        checkBoxPanel.add(checkBox);
+//        checkBoxPanel.add(Box.createRigidArea(new Dimension(5,0)));
+
+        textLabel = new JLabel(htmlPrefix + taskName + " | " + taskDesc + " | " + remainTimeDesc + htmlSuffix);
+        startAndPauseBtn = new JButton("▶");
+        startAndPauseBtn.addActionListener(e -> {
+            if (isStart) {
+                pauseTimer();
+                startAndPauseBtn.setText("▶");
+                isStart = !isStart;
+                Border lineBorder = new LineBorder(Color.GRAY, 1);
+                TitledBorder titledBorder = BorderFactory.createTitledBorder(lineBorder, "#1");
+                this.setBorder(titledBorder);
+                checkBox.setEnabled(true);
+                checkBox.doClick();
+                checkBox.setEnabled(false);
+            } else {
+                startTimer();
+                startAndPauseBtn.setText("⏸");
+                isStart = !isStart;
+                Border lineBorder = new LineBorder(Color.GREEN, 1);
+                TitledBorder titledBorder = BorderFactory.createTitledBorder(lineBorder, "#1");
+                this.setBorder(titledBorder);
+            }
+        });
+        editBtn = new JButton("✎");
         editBtn.addActionListener(e -> clickEdit());
+        JButton doneBtn = new JButton("√");
+        doneBtn.addActionListener(e -> doneTask());
         JPanel operatePanel = new JPanel();
         operatePanel.setLayout(new GridLayout());
         operatePanel.add(editBtn);
-        operatePanel.add(startBtn);
-        operatePanel.add(endBtn);
+        operatePanel.add(startAndPauseBtn);
+        operatePanel.add(doneBtn);
+//        this.add(checkBoxPanel,BorderLayout.WEST);
         this.add(textLabel, BorderLayout.CENTER);
         this.add(operatePanel, BorderLayout.EAST);
         textLabel.setVerticalTextPosition(JLabel.CENTER);
 
-        Border lineBorder = new LineBorder(Color.gray, 1);
+        Border lineBorder = new LineBorder(Color.GRAY, 1);
         TitledBorder titledBorder = BorderFactory.createTitledBorder(lineBorder, "#1");
         this.setBorder(titledBorder);
     }
@@ -80,7 +130,7 @@ public class TaskItem extends JPanel {
     private void startTimer() {
         timer = new Timer(1000, e -> {
             remainTime -= 1;
-            textLabel.setText(taskName + " | " + taskDesc + " | " + Utils.secondsToTime(remainTime));
+            textLabel.setText(htmlPrefix + taskName + " | " + taskDesc + " | " + Utils.secondsToTime(remainTime) + htmlSuffix);
         });
         timer.start();
 
@@ -126,6 +176,24 @@ public class TaskItem extends JPanel {
             return this;
         }
         return null;
+    }
+
+    private void doneTask(){
+        if(isDone){
+            htmlPrefix = "<html><body>";
+            htmlSuffix = "</body></html>";
+            textLabel.setText(htmlPrefix + taskName + " | " + taskDesc + " | " + Utils.secondsToTime(remainTime) + htmlSuffix);
+            startAndPauseBtn.setEnabled(true);
+            editBtn.setEnabled(true);
+            isDone = false;
+        }else {
+            htmlPrefix = "<html><body><s>";
+            htmlSuffix = "</s></body></html>";
+            textLabel.setText(htmlPrefix + taskName + " | " + taskDesc + " | " + Utils.secondsToTime(remainTime) + htmlSuffix);
+            startAndPauseBtn.setEnabled(false);
+            editBtn.setEnabled(false);
+            isDone = true;
+        }
     }
 
     class EditDialog extends JPanel {
@@ -192,6 +260,8 @@ public class TaskItem extends JPanel {
             this.add(remainTime);
         }
     }
+
+    public class SaveFiled{}
 
     public static void main(String[] args) {
         TaskItem taskItem = new TaskItem("tn", "td", 6000);

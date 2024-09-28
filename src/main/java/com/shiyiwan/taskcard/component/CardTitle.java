@@ -41,8 +41,10 @@ public class CardTitle extends JPanel {
             taskContainer.revalidate();
             taskContainer.repaint();
         });
-        JButton saveBtn = new JButton("\uD83D\uDDAB");
-        saveBtn.addActionListener(e -> PersistenceManager.saveData());
+
+        ImageIcon originalIcon = new ImageIcon("src/main/resources/icon/download16.png");
+        JButton saveBtn = new JButton(originalIcon);
+        saveBtn.addActionListener(e -> onClickSave());
 
         operationPanel.add(addBtn);
         operationPanel.add(saveBtn);
@@ -80,6 +82,21 @@ public class CardTitle extends JPanel {
         long totalSecondsInDay = ChronoUnit.SECONDS.between(LocalTime.MIN, LocalTime.MAX) + 1;
         double todayRemain = (double) (totalSecondsInDay - secondsRemaining) / totalSecondsInDay * 100;
         todayRemainBar.setValue((int) todayRemain);
+    }
+
+    private void onClickSave(){
+        JDialog jDialog;
+        String dialogTitle;
+        int result = JOptionPane.showConfirmDialog(
+                GlobalMap.getTaskContainer(),
+                "Are you sure you want to save data?",
+                "Save",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.QUESTION_MESSAGE
+        );
+        if(result == JOptionPane.OK_OPTION){
+            PersistenceManager.saveData();
+        }
     }
 
     public static void main(String[] args) {
