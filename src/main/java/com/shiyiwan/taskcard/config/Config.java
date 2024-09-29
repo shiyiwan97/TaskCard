@@ -34,6 +34,10 @@ public class Config {
     public static final int OVERTIME_STRATEGY_CONTINUE = 0;
     public static final int OVERTIME_STRATEGY_STOP = 1;
 
+    // notify
+    public static boolean useSystemTray = true;
+    public static TimerNotifyEnum notifyType = TimerNotifyEnum.USE_POWERSHELL;
+
     @Getter
     @Setter
     // Save And Sync
@@ -41,5 +45,16 @@ public class Config {
     public static Boolean saveBeforeStopTimer = false;
     public static boolean saveBeforeProcessKilled = false;
 
+
+    enum TimerNotifyEnum {
+
+        USE_POWERSHELL("need PowerShell environment"),
+        USE_SWING("swing only");
+        private String desc;
+
+        TimerNotifyEnum(String desc) {
+            this.desc = desc;
+        }
+    }
 
 }

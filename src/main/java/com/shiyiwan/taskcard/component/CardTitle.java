@@ -55,7 +55,7 @@ public class CardTitle extends JPanel {
         center.add(todayRemainBar);
         center.add(timeLabel);
         this.add(center, BorderLayout.CENTER);
-        this.add(operationPanel,BorderLayout.EAST);
+        this.add(operationPanel, BorderLayout.EAST);
         update();
     }
 
@@ -64,8 +64,8 @@ public class CardTitle extends JPanel {
             now = LocalDateTime.now();
             String currentTime = new SimpleDateFormat("HH:mm:ss").format(new Date());
             timeLabel.setText(currentTime);
+            setTodayRemain();
         }).start();
-        setTodayRemain();
     }
 
     private void creatTask(JPanel container) {
@@ -81,10 +81,13 @@ public class CardTitle extends JPanel {
         long secondsRemaining = ChronoUnit.SECONDS.between(now, endOfDay);
         long totalSecondsInDay = ChronoUnit.SECONDS.between(LocalTime.MIN, LocalTime.MAX) + 1;
         double todayRemain = (double) (totalSecondsInDay - secondsRemaining) / totalSecondsInDay * 100;
-        todayRemainBar.setValue((int) todayRemain);
+        int value = todayRemainBar.getValue();
+        if (value != (int) todayRemain) {
+            todayRemainBar.setValue((int) todayRemain);
+        }
     }
 
-    private void onClickSave(){
+    private void onClickSave() {
         JDialog jDialog;
         String dialogTitle;
         int result = JOptionPane.showConfirmDialog(
@@ -94,7 +97,7 @@ public class CardTitle extends JPanel {
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.QUESTION_MESSAGE
         );
-        if(result == JOptionPane.OK_OPTION){
+        if (result == JOptionPane.OK_OPTION) {
             PersistenceManager.saveData();
         }
     }
