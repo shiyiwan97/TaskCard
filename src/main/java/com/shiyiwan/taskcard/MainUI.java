@@ -16,8 +16,23 @@ import java.awt.*;
  */
 public class MainUI {
 
+
     public static void main(String[] args) throws UnsupportedLookAndFeelException {
-        UIManager.setLookAndFeel(new FlatLightLaf());
+        SwingUtilities.invokeLater(() -> {
+            // fix white screen cause by Direct3D and DirectDraw
+            // AMD cpu and integrated graphics may cause that
+            System.setProperty("sun.java2d.d3d", "false");
+            System.setProperty("sun.java2d.noddraw", "true");
+            createUI();
+        });
+    }
+
+    public static void createUI() {
+        try {
+            UIManager.setLookAndFeel(new FlatLightLaf());
+        } catch (UnsupportedLookAndFeelException e) {
+            throw new RuntimeException(e);
+        }
         JFrame jFrame = new JFrame();
         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jFrame.setSize(800, 600);
@@ -36,6 +51,7 @@ public class MainUI {
         jFrame.add(taskContainer, BorderLayout.CENTER);
         jFrame.add(cardTitle, BorderLayout.NORTH);
         jFrame.setVisible(true);
+        System.out.println("start success");
     }
 
 }
